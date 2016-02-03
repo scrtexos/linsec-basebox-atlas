@@ -1,17 +1,11 @@
 {
     "variables": {
         "atlas_username": "scrt",
-        "box_version": "0.0.0",
-        "box_timestamp": "{{timestamp}}",
         "atlas_name": "lxs-1-amd64"
     },
     "provisioners": [
         {
             "type": "shell",
-            "environment_vars": [
-                "BOX_VERSION={{ user `box_version` }}",
-                "BOX_TIMESTAMP={{ user `box_timestamp` }}"
-            ],
             "scripts": [
                 "scripts/base-centos7-vbox.sh",
                 "scripts/devtools.sh",
@@ -56,8 +50,7 @@
     "post-processors": [
         {
             "type": "vagrant",
-            "output": "nespresso-basebox-centos7.box",
-            "only": ["virtualbox-iso"]
+            "keep_input_artifact": false
         },
         {
             "type": "atlas",

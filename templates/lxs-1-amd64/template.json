@@ -1,0 +1,66 @@
+{
+    "variables": {
+        "atlas_username": "scrt",
+        "atlas_name": "lxs-1-amd64"
+    },
+    "provisioners": [
+        {
+            "type": "shell",
+            "scripts": [
+                "scripts/base-centos7-vbox.sh",
+                "scripts/devtools.sh",
+                "scripts/virtualbox.sh"
+            ],
+            "override": {
+                "virtualbox-iso": {
+                    "execute_command": "echo 'packerio' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+                }
+            }
+        }
+    ],
+    "builders": [
+        {
+            "type": "virtualbox-iso",
+            "vm_name": "lxs-1-amd64",
+            "boot_command": [
+                "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+            ],
+            "boot_wait": "10s",
+            "disk_size": 500000,
+            "guest_os_type": "RedHat_64",
+            "http_directory": "http",
+            "iso_checksum": "02632a84db790a7683b69ac5028ba023b5da9aee",
+            "iso_checksum_type": "sha1",
+            "iso_url": "http://linuxsoft.cern.ch/centos/7/isos/x86_64/CentOS-7-x86_64-Everything-1511.iso",
+            "ssh_username": "packerio",
+            "ssh_password": "packerio",
+            "ssh_port": 22,
+            "ssh_wait_timeout": "10000s",
+            "shutdown_command": "echo '/sbin/halt -h -p' > shutdown.sh; echo 'packerio'|sudo -S sh 'shutdown.sh'",
+            "guest_additions_path": "/tmp/VBoxGuestAdditions.iso",
+            "virtualbox_version_file": ".vbox_version",
+            "headless": true,
+            "vboxmanage": [
+               [ "modifyvm", "{{.Name}}", "--memory", "512" ],
+               [ "modifyvm", "{{.Name}}", "--cpus", "1" ],
+               [ "modifyvm", "{{.Name}}", "--natdnshostresolver1", "on" ]
+            ]   
+        }
+    ],
+    "post-processors": [
+        {
+            "type": "vagrant",
+            "keep_input_artifact": false
+        },
+        {
+            "type": "atlas",
+            "only": ["virtualbox-iso"],
+            "artifact": "{{user `atlas_username`}}/{{user `atlas_name`}}",
+            "artifact_type": "vagrant.box",
+            "metadata": {
+                "provider": "virtualbox",
+                "version": "0.0.1"
+            }
+        }
+    ]
+}

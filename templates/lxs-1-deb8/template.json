@@ -1,0 +1,72 @@
+{
+  "variables": {
+    "PACKER_OS_FLAVOUR": "debian",
+    "PACKER_ATLAS_TOKEN": "{{env `PACKER_ATLAS_TOKEN`}}",
+    "PACKER_ATLAS_VERSION": "",
+    "DISK_SIZE": "25140"
+  },
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<esc><wait>",
+        "install <wait>",
+        "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg <wait>",
+        "debian-installer=en_US <wait>",
+        "auto <wait>",
+        "locale=en_US <wait>",
+        "kbd-chooser/method=us <wait>",
+        "keyboard-configuration/xkb-keymap=us <wait>",
+        "netcfg/get_hostname={{ .Name }} <wait>",
+        "netcfg/get_domain=vagrantup.com <wait>",
+        "fb=false <wait>",
+        "debconf/frontend=noninteractive <wait>",
+        "console-setup/ask_detect=false <wait>",
+        "console-keymaps-at/keymap=us <wait>",
+        "<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "headless": false,
+      "disk_size": 80000,
+      "guest_os_type": "Debian_64",
+      "http_directory": "http",
+      "iso_checksum": "070db3644c39374fdc87fd3de51388dcc0e05b866eaf37f2193d1818f0128e938c42e4eb9f1de555741c143a51edee07903a33271fca2696a771e4ae5c868277",
+      "iso_checksum_type": "sha512",
+      "iso_url": "http://cdimage.debian.org/cdimage/release/8.3.0/amd64/iso-cd/debian-8.3.0-amd64-netinst.iso",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "echo 'vagrant'|sudo -S /sbin/shutdown -hP now",
+      "guest_additions_path": "/tmp/VBoxGuestAdditions.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "lxs-1-deb8",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--memory", "512" ],
+        [ "modifyvm", "{{.Name}}", "--cpus", "1" ],
+        [ "modifyvm", "{{.Name}}", "--natdnshostresolver1", "on" ]
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'",
+      "scripts": [
+        "scripts/update.sh",
+        "scripts/sshd.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type": "vagrant",
+        "compression_level": 9,
+        "output": "./builds/lxs-1-deb8.box",
+        "only": ["virtualbox-iso"]
+      }
+    ]
+  ]
+}
+

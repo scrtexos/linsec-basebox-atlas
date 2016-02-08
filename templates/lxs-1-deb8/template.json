@@ -53,8 +53,10 @@
       "type": "shell",
       "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'",
       "scripts": [
+        "scripts/sudoers.sh",
         "scripts/update.sh",
-        "scripts/sshd.sh"
+        "scripts/sshd.sh",
+        "scripts/virtualbox.sh"
       ]
     }
   ],
